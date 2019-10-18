@@ -1,20 +1,35 @@
 import React, {Component} from 'react';
+import Header from './Header';
+import AgreeRating from './AgreeRating';
+import Footer from './Footer';
+import Map from './Map';
+import MyStatements from './MyStatements'
+import StatementForm from './StatementForm';
+import SideBar from './SideBar';
+import '../assets/stylesheets/dashboard.scss'
 
 class DashBoard extends Component {
   render(){
     return (
-      <div className="col-md-12">
-        <div className="col-md-1"></div>
-        <div className="col-md-11">
-          <div className="col-md-12">
-            <div className="col-md-1 pull-left">DASHBOARD</div>
-            <div className="col-md-1 pull-right">
-              <a href="/">iAgree</a> > Home
+      <React.Fragment>
+        <div className="d-flex" id="wrapper">
+          <SideBar />
+          <div id="page-content-wrapper">
+            <Header />
+            <div className="container-fluid">
+              <div className="row">
+                <div className="col-md-12 p-2">
+                  <StatementForm />
+                  <MyStatements />
+                  <Map />
+                  <AgreeRating />
+                </div>
+              </div>
             </div>
-            <div></div>
           </div>
         </div>
-      </div>
+        <Footer />
+      </React.Fragment>
     )
   }
 }
