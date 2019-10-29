@@ -1,1 +1,2 @@
 export const ADD_STATEMENT = "ADD_STATEMENT";
+export const LOAD_ALL_SATEMENT = "LOAD_ALL_SATEMENT";
