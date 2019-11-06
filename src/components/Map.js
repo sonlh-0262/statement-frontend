@@ -1,5 +1,5 @@
-
 import React, {Component} from 'react';
+import Place from './Place';
 
 class Map extends Component {
   render(){
@@ -9,7 +9,9 @@ class Map extends Component {
           <div className="card-header">
             <span className="text-success"><strong>MAP</strong></span>
           </div>
-          <div className="card-body">Panel Content</div>
+          <div className="card-body">
+            <Place />
+          </div>
         </div>
       </div>
     )

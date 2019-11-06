@@ -1,7 +1,11 @@
 
 import React, {Component} from 'react';
-import Location from './Location';
 import Select from 'react-select/creatable';
+import PlaceModal from './PlaceModal';
+import {connect} from 'react-redux';
+import axios from 'axios'
+import statements from '../reducers/statementReducer';
+import {addStatement} from '../actions/statementActions'
 
 const colourOptions = [
   { value: 'chocolate', label: 'Chocolate' },
@@ -15,15 +19,33 @@ class StatementForm extends Component {
     this.state = {
       title: '',
       description: '',
-      category: null,
-      place: ''
+      category: [],
+      address: '',
+      show_modal: false,
+      latLng: {lat: 21.202160, lng: 105.906600}
     }
   }
 
+  componentDidMount(){
+    console.log("statements:",this.props.statements, this.props)
+  }
+
   handleSubmit(event){
-    var formData = new FormData();
+    const {title, description, category, address} =  this.state;
+    const {lat, lng} =  this.state.latLng;
+
+    const data = {
+
+    }
+
     event.preventDefault();
-    
+    this.props.addStatement(2)
+
+    // axios.post('/api/statements/', {data})
+    //   .then(response => {
+    //     this.props.addStatement(response.statement)
+    //   })
+    //   .catch(error => console.log(error))
   }
 
   handleChange(event){
@@ -41,11 +63,19 @@ class StatementForm extends Component {
     }
   }
 
+  handleHideShowModal = (value) => {
+    this.setState({show_modal: !this.state.show_modal})
+  }
+
+  handleGetLocationFromModal = (location) => {
+    this.setState({latLng: location.latLng, address: location.address})
+  }
+
   render(){
+    const {address, title, description, category} = this.state;
     return(
       <div className="col-md-6 float-left p-3">
         <div className="card">
-          <div className="card-header"><span className="text-success"><strong>ADD STATEMENT</strong></span></div>
           <div className="card-body">
             <form onSubmit={this.handleSubmit.bind(this)}>
               <div className="form-group">
@@ -84,7 +114,18 @@ class StatementForm extends Component {
               </div>
               <div className="form-group">
                 <label htmlFor="statemente_title">Place:</label>
-                <Location />
+                <div className="input-group">
+                  <div className="input-group-prepend">
+                    <span className="input-group-text"></span>
+                  </div>
+                  <input type="text" defaultValue={address} className="form-control" placeholder="Please select a place!" onClick={this.handleHideShowModal}/>
+                  {this.state.show_modal && (<PlaceModal
+                    address={this.state.address}
+                    latLng={this.state.latLng}
+                    handleHideShowModal={this.handleHideShowModal} show_modal={this.state.show_modal} 
+                    handleGetLocationFromModal={this.handleGetLocationFromModal}
+                    />)}
+                </div>
               </div>
               <button type="submit" className="btn btn-success pull-right">Submit</button>
             </form>
@@ -95,4 +136,12 @@ class StatementForm extends Component {
   }
 }
 
-export default StatementForm;
+const mapStateToProps = state => {
+  return {statements: state.statementReducer}
+}
+
+const mapDispatchToProps = {
+  addStatement
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(StatementForm);
