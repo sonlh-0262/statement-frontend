@@ -1,17 +1,12 @@
 
 import React, {Component} from 'react';
-import Select from 'react-select/creatable';
+import CreatableSelect from 'react-select/creatable';
 import PlaceModal from './PlaceModal';
 import {connect} from 'react-redux';
-import axios from 'axios'
+import axios from 'axios';
+import _ from 'lodash';
 import statements from '../reducers/statementReducer';
-import {addStatement} from '../actions/statementActions'
-
-const colourOptions = [
-  { value: 'chocolate', label: 'Chocolate' },
-  { value: 'strawberry', label: 'Strawberry' },
-  { value: 'vanilla', label: 'Vanilla' },
-];
+import {addStatement} from '../actions/statementActions';
 
 class StatementForm extends Component {
   constructor(props, context) {
@@ -19,33 +14,54 @@ class StatementForm extends Component {
     this.state = {
       title: '',
       description: '',
-      category: [],
-      address: '',
+      categories: [],
+      selected_categories: [],
+      place: '',
       show_modal: false,
       latLng: {lat: 21.202160, lng: 105.906600}
     }
   }
 
-  componentDidMount(){
-    console.log("statements:",this.props.statements, this.props)
+  componentDidMount() {
+    axios.get('http://localhost:3000/api/categories')
+    .then(response => {
+      this.setState({categories: response.data.categories})
+    })
+    .catch(error => console.log(error))
+  }
+
+  general_actegories(category){
+    const {label, value, id} = category
+
+    return {category_id: parseInt(id), category_attributes: {id: parseInt(id), name: label}}
   }
 
   handleSubmit(event){
-    const {title, description, category, address} =  this.state;
-    const {lat, lng} =  this.state.latLng;
-
-    const data = {
-
-    }
-
     event.preventDefault();
-    this.props.addStatement(2)
+    
+    const {title, description, place, selected_categories} =  this.state;
+    const {lat, lng} =  this.state.latLng;
+    const category_statements_attributes = _.map(selected_categories, this.general_actegories)
 
-    // axios.post('/api/statements/', {data})
-    //   .then(response => {
-    //     this.props.addStatement(response.statement)
-    //   })
-    //   .catch(error => console.log(error))
+    const statement = {
+      title,
+      description,
+      lat,
+      lng,
+      place,
+      category_statements_attributes
+   }
+
+    axios.post('http://localhost:3000/api/statements', {statement})
+      .then(response => {
+        this.props.addStatement(response.data.statement)
+        this.reFreshForm()
+      })
+      .catch(error => console.log(error))
+  }
+
+  reFreshForm = () => {
+    this.setState({title: '', description: '', lat: '', lng: '', place: '', selected_categories: []})
   }
 
   handleChange(event){
@@ -57,10 +73,8 @@ class StatementForm extends Component {
     })
   }
 
-  handleChangeSelectCategory(event){
-    if(event){
-      this.setState({category: event})
-    }
+  handleChangeSelectCategory = (selected) => {
+    this.setState({selected_categories: selected})
   }
 
   handleHideShowModal = (value) => {
@@ -68,11 +82,16 @@ class StatementForm extends Component {
   }
 
   handleGetLocationFromModal = (location) => {
-    this.setState({latLng: location.latLng, address: location.address})
+    this.setState({latLng: location.latLng, place: location.address})
+  }
+
+  handleHideShowModal = (value) => {
+    this.setState({show_modal: !this.state.show_modal})
   }
 
   render(){
-    const {address, title, description, category} = this.state;
+    const {place, title, description, selected_categories, categories} = this.state;
+
     return(
       <div className="col-md-6 float-left p-3">
         <div className="card">
@@ -86,6 +105,7 @@ class StatementForm extends Component {
                   id="statemente_title"
                   placeholder="Enter title"
                   onChange={this.handleChange.bind(this)}
+                  value={title}
                   name="title"
                   />
               </div>
@@ -98,18 +118,19 @@ class StatementForm extends Component {
                   placeholder="Description"
                   onChange={this.handleChange.bind(this)}
                   name="description"
+                  value={description}
                 />
               </div>
               <div className="form-group pb-1">
-                <label htmlFor="statemente_title">Category:</label>
-                <Select
-                  // defaultValue={[colourOptions[2], colourOptions[1]]}
+                <label htmlFor="statemente_title">Categories:</label>
+                <CreatableSelect
                   isMulti
                   name="categories"
-                  options={colourOptions}
+                  value={selected_categories}
+                  options={categories}
                   className="basic-multi-select"
                   classNamePrefix="select"
-                  onChange={this.handleChangeSelectCategory.bind(this)}
+                  onChange={this.handleChangeSelectCategory}
                 />
               </div>
               <div className="form-group">
@@ -118,9 +139,9 @@ class StatementForm extends Component {
                   <div className="input-group-prepend">
                     <span className="input-group-text"></span>
                   </div>
-                  <input type="text" defaultValue={address} className="form-control" placeholder="Please select a place!" onClick={this.handleHideShowModal}/>
+                  <input type="text" defaultValue={place} className="form-control" placeholder="Please select a place!" onClick={this.handleHideShowModal}/>
                   {this.state.show_modal && (<PlaceModal
-                    address={this.state.address}
+                    address={this.state.place}
                     latLng={this.state.latLng}
                     handleHideShowModal={this.handleHideShowModal} show_modal={this.state.show_modal} 
                     handleGetLocationFromModal={this.handleGetLocationFromModal}

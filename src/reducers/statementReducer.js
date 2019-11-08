@@ -1,23 +1,17 @@
-import {ADD_STATEMENT} from '../constants/statementTypes';
+import {ADD_STATEMENT, LOAD_ALL_SATEMENT} from '../constants/statementTypes';
 
-const initSate = [
-  {
-    id: 1
-  }
-]
+const initSate = []
 
-export default function statements(state = initSate, action) {
+export default function statements(states = initSate, action) {
   switch(action.type){
     case ADD_STATEMENT:
-      console.log([
-        {id: action.statement},
-        ...state
-      ])
       return [
-        {id: action.statement.id},
-        ...state
+        action.statement,
+        ...states
       ]
+    case LOAD_ALL_SATEMENT:
+      return [...action.statements]
     default:
-      return state;
+      return states;
   }
 }
